@@ -180,6 +180,7 @@
 				4E9889B025F807600059258F /* Sources */,
 				4E9889B125F807600059258F /* Frameworks */,
 				4E9889B225F807600059258F /* Resources */,
+				0C89C29434DC0C30220F2D29 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -217,6 +218,7 @@
 				4E9889D125F807610059258F /* Sources */,
 				4E9889D225F807610059258F /* Frameworks */,
 				4E9889D325F807610059258F /* Resources */,
+				957544DFF7E057D2D4861B39 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -298,6 +300,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		0C89C29434DC0C30220F2D29 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-breakingbadgan/Pods-breakingbadgan-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-breakingbadgan/Pods-breakingbadgan-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-breakingbadgan/Pods-breakingbadgan-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		2C49D7DF857FC8C9DC5CD6A6 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -340,6 +359,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		957544DFF7E057D2D4861B39 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-breakingbadgan-breakingbadganUITests/Pods-breakingbadgan-breakingbadganUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-breakingbadgan-breakingbadganUITests/Pods-breakingbadgan-breakingbadganUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-breakingbadgan-breakingbadganUITests/Pods-breakingbadgan-breakingbadganUITests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		D6F44937F4233E042E2BFCDE /* [CP] Check Pods Manifest.lock */ = {
