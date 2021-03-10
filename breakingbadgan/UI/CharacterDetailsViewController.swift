@@ -18,11 +18,6 @@ class CharacterDetailsViewController: UIViewController {
     
     var character: Character?
     
-    let occupationStr = "Occupation:"
-    let statusStr = "Status:"
-    let nicknameStr = "Nickname:"
-    let seasonAppearancesStr = "Season appearances:"
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -36,14 +31,23 @@ class CharacterDetailsViewController: UIViewController {
                 image.sd_setImage(with: url, placeholderImage: UIImage(named: "Breaking_Bad_logo"))
             }
             
-            let formattedOccupationText = (character.occupation.map{String($0)}).joined(separator: ", ")
-            occupationLabel.text = "\(occupationStr) \(formattedOccupationText)"
+            if let occupationText = occupationLabel.text {
+                let formattedOccupationText = (character.occupation.map{String($0)}).joined(separator: ", ")
+                occupationLabel.text = "\(occupationText) \(formattedOccupationText)"
+            }
             
-            statusLabel.text = "\(statusStr) \(character.status)"
-            nicknameLabel.text = "\(nicknameStr) \(character.nickname)"
+            if let statusText = statusLabel.text {
+                statusLabel.text = "\(statusText) \(character.status)"
+            }
             
-            let formattedSeasonAppearanceText = (character.appearance.map{String($0)}).joined(separator: ", ")
-            seasonAppearanceLabel.text = "\(seasonAppearancesStr) \(formattedSeasonAppearanceText)"
+            if let nicknameText = nicknameLabel.text {
+                nicknameLabel.text = "\(nicknameText) \(character.nickname)"
+            }
+            
+            if let seasonAppearanceText = seasonAppearanceLabel.text {
+                let formattedSeasonAppearanceText = (character.appearance.map{String($0)}).joined(separator: ", ")
+                seasonAppearanceLabel.text = "\(seasonAppearanceText) \(formattedSeasonAppearanceText)"
+            }
         }
     }
     
