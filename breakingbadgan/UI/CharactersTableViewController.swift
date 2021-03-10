@@ -13,7 +13,10 @@ class CharactersTableViewController: UITableViewController {
     private let viewModel = CharactersViewModel()
     
     let searchController = UISearchController(searchResultsController: nil)
+    let segmentedControl: UISegmentedControl = UISegmentedControl.init(items: ["All", "S1",  "S2", "S3", "S4", "S5" ])
+    
     var filteredCharacters: [Character] = []
+    var segmentCharacters: [Character] = []
     var isSearchBarEmpty: Bool {
         return searchController.searchBar.text?.isEmpty ?? true
     }
@@ -28,6 +31,7 @@ class CharactersTableViewController: UITableViewController {
         super.viewDidLoad()
         
         setupSearchController()
+        setupSegmentedControl()
 
         let request = ServerRequest<CharactersRequest>.init(data: CharactersRequest.init())
         viewModel.getCharacters(charactersRequest: request).subscribe(onNext: { [weak self] (characters) in
@@ -48,7 +52,7 @@ class CharactersTableViewController: UITableViewController {
     private func onSuccess(_ characters: [Character]?) {
         if let characters = characters {
             print("Characters: \(characters)")
-            filteredCharacters = characters
+            segmentCharacters = characters
             tableView.reloadData()
         }
     }
@@ -65,6 +69,16 @@ class CharactersTableViewController: UITableViewController {
         definesPresentationContext = true
     }
     
+    private func setupSegmentedControl() {
+        segmentedControl.backgroundColor = .colorPrimary
+        let attributes: [NSAttributedString.Key : Any] = [.foregroundColor: UIColor.white]
+        let selectedAttributes: [NSAttributedString.Key : Any] = [.foregroundColor : UIColor.colorPrimary]
+        segmentedControl.setTitleTextAttributes(attributes, for: .normal)
+        segmentedControl.setTitleTextAttributes(selectedAttributes, for: .selected)
+        segmentedControl.selectedSegmentIndex = 0
+        segmentedControl.addTarget(self, action: #selector(segmentedValueChanged(_:)), for: .valueChanged)
+    }
+    
     private func filterContentForSearchText(
         _ searchText: String,
         category: String? = nil
@@ -72,6 +86,20 @@ class CharactersTableViewController: UITableViewController {
         if let characters = viewModel.characters {
             filteredCharacters = characters.filter { (character: Character) -> Bool in
                 return character.name.lowercased().contains(searchText.lowercased())
+            }
+            
+            tableView.reloadData()
+        }
+    }
+    
+    private func filterSegmentCharacters(segmentIndex: Int) {
+        if let characters = viewModel.characters {
+            if segmentIndex == 0 {
+                segmentCharacters = characters
+            } else {
+                segmentCharacters = characters.filter({ (character: Character) -> Bool in
+                    return character.appearance.contains(segmentIndex)
+                })
             }
             
             tableView.reloadData()
@@ -88,6 +116,13 @@ class CharactersTableViewController: UITableViewController {
             cell?.characterImageView.sd_setImage(with: url, placeholderImage: UIImage(named: "Breaking_Bad_logo"))
         }
     }
+    
+    @objc func segmentedValueChanged(_ sender: UISegmentedControl!) {
+        let selectedSegment = sender.selectedSegmentIndex
+        print("Selected Segment Index is : \(selectedSegment)")
+        
+        filterSegmentCharacters(segmentIndex: selectedSegment)
+    }
 
     // MARK: - Table view data source
 
@@ -100,17 +135,48 @@ class CharactersTableViewController: UITableViewController {
             return filteredCharacters.count
         }
         
-        return viewModel.characters?.count ?? 0
+        return segmentCharacters.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
             withIdentifier: "CharacterCell", for: indexPath) as? CharacterCell
-        if let character = viewModel.characters?[indexPath.row] {
+        
+        var character: Character?
+        
+        if isFiltering {
+            character = filteredCharacters[indexPath.row]
+        } else {
+            character = segmentCharacters[indexPath.row]
+        }
+        
+        if let character = character {
             setupCharacterCell(cell: cell, character: character)
         }
         
         return cell ?? CharacterCell()
+    }
+    
+    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        if section == 0 {
+            let viewHeader = UIView.init(frame: CGRect(
+                x: 0,
+                y: 0,
+                width: self.view.bounds.width - 40,
+                height: 24))
+            viewHeader.backgroundColor = .clear
+            
+            segmentedControl.frame = CGRect(
+                x: 20,
+                y: 0,
+                width: viewHeader.frame.size.width,
+                height: viewHeader.frame.size.height)
+            viewHeader.addSubview(segmentedControl)
+            
+            return viewHeader
+        }
+        
+        return nil
     }
 }
 
