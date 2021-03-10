@@ -10,7 +10,8 @@ import SDWebImage
 
 class CharactersTableViewController: UITableViewController {
 
-    private let viewModel = CharactersViewModel()
+    let viewModel = CharactersViewModel()
+    let showCharacterDetailsSegue = "ShowCharacterDetailsSegue"
     
     let searchController = UISearchController(searchResultsController: nil)
     let segmentedControl: UISegmentedControl = UISegmentedControl.init(items: ["All", "S1",  "S2", "S3", "S4", "S5" ])
@@ -23,6 +24,7 @@ class CharactersTableViewController: UITableViewController {
     var isFiltering: Bool {
         return searchController.isActive && !isSearchBarEmpty
     }
+    var selectedCharacter: Character?
     
 
     // MARK: - Lifecycle methods
@@ -41,6 +43,14 @@ class CharactersTableViewController: UITableViewController {
             guard let strongSelf = self else { return }
             strongSelf.onError(error)
         }).disposed(by: AppDelegate.sharedDelegate().disposeBag)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == showCharacterDetailsSegue {
+            if let characterDetailsVC = segue.destination as? CharacterDetailsViewController {
+                characterDetailsVC.character = selectedCharacter
+            }
+        }
     }
     
     deinit {
@@ -79,6 +89,26 @@ class CharactersTableViewController: UITableViewController {
         segmentedControl.addTarget(self, action: #selector(segmentedValueChanged(_:)), for: .valueChanged)
     }
     
+    private func setupCharacterCell(
+        cell: CharacterCell?,
+        character: Character,
+        selectedCharacterIndex: Int
+    ) {
+        cell?.characterNameLabel.text = character.name
+    
+        if let escaped = character.img.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed),
+            let url = URL.init(string: escaped) {
+            
+            cell?.characterImageView.sd_imageIndicator = SDWebImageActivityIndicator.gray
+            cell?.characterImageView.sd_setImage(with: url, placeholderImage: UIImage(named: "Breaking_Bad_logo"))
+            cell?.characterDetailsButton.tag = selectedCharacterIndex
+            cell?.characterDetailsButton.addTarget(
+                self,
+                action: #selector(characterSelected(_:)),
+                for: .touchUpInside)
+        }
+    }
+    
     private func filterContentForSearchText(
         _ searchText: String,
         category: String? = nil
@@ -106,14 +136,22 @@ class CharactersTableViewController: UITableViewController {
         }
     }
     
-    private func setupCharacterCell(cell: CharacterCell?,  character: Character) {
-        cell?.characterNameLabel.text = character.name
+    private func getCharacterByIndex(index: Int) -> Character? {
+        if isFiltering {
+            return filteredCharacters[index]
+        }
+        
+        return segmentCharacters[index]
+    }
     
-        if let escaped = character.img.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed),
-            let url = URL.init(string: escaped) {
+    @objc func characterSelected(_ sender: UIButton) {
+        let selectedCharacterIndex = sender.tag
+        
+        if let character = getCharacterByIndex(index: selectedCharacterIndex) {
+            print("Selected character: \(character.name)")
             
-            cell?.characterImageView.sd_imageIndicator = SDWebImageActivityIndicator.gray
-            cell?.characterImageView.sd_setImage(with: url, placeholderImage: UIImage(named: "Breaking_Bad_logo"))
+            selectedCharacter = character
+            performSegue(withIdentifier: showCharacterDetailsSegue, sender: nil)
         }
     }
     
@@ -142,16 +180,11 @@ class CharactersTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(
             withIdentifier: "CharacterCell", for: indexPath) as? CharacterCell
         
-        var character: Character?
-        
-        if isFiltering {
-            character = filteredCharacters[indexPath.row]
-        } else {
-            character = segmentCharacters[indexPath.row]
-        }
-        
-        if let character = character {
-            setupCharacterCell(cell: cell, character: character)
+        if let character = getCharacterByIndex(index: indexPath.row) {
+            setupCharacterCell(
+                cell: cell,
+                character: character,
+                selectedCharacterIndex: indexPath.row)
         }
         
         return cell ?? CharacterCell()

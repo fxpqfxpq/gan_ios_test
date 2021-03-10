@@ -13,6 +13,7 @@ class CharacterCell: UITableViewCell {
     @IBOutlet weak var cardView: MDCCard!
     @IBOutlet weak var characterImageView: UIImageView!
     @IBOutlet weak var characterNameLabel: UILabel!
+    @IBOutlet weak var characterDetailsButton: UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()
