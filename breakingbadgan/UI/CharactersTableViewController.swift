@@ -17,6 +17,9 @@ class CharactersTableViewController: UITableViewController {
     var isSearchBarEmpty: Bool {
         return searchController.searchBar.text?.isEmpty ?? true
     }
+    var isFiltering: Bool {
+        return searchController.isActive && !isSearchBarEmpty
+    }
     
 
     // MARK: - Lifecycle methods
@@ -34,12 +37,6 @@ class CharactersTableViewController: UITableViewController {
             guard let strongSelf = self else { return }
             strongSelf.onError(error)
         }).disposed(by: AppDelegate.sharedDelegate().disposeBag)
-        
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
     
     deinit {
@@ -62,14 +59,10 @@ class CharactersTableViewController: UITableViewController {
     
     private func setupSearchController() {
         searchController.searchResultsUpdater = self
-        searchController.hidesNavigationBarDuringPresentation = false
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search Breaking Bad Characters"
-        searchController.searchBar.searchBarStyle = .minimal
-        
-        tableView.tableHeaderView = searchController.searchBar
+        searchController.searchBar.placeholder = "Search Characters"
+        navigationItem.searchController = searchController
         definesPresentationContext = true
-        navigationItem.hidesSearchBarWhenScrolling = true
     }
     
     private func filterContentForSearchText(
@@ -79,10 +72,6 @@ class CharactersTableViewController: UITableViewController {
         if let characters = viewModel.characters {
             filteredCharacters = characters.filter { (character: Character) -> Bool in
                 return character.name.lowercased().contains(searchText.lowercased())
-            }
-            
-            if (searchText.isEmpty) {
-                filteredCharacters = characters
             }
             
             tableView.reloadData()
@@ -107,14 +96,19 @@ class CharactersTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredCharacters.count
+        if isFiltering {
+            return filteredCharacters.count
+        }
+        
+        return viewModel.characters?.count ?? 0
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
             withIdentifier: "CharacterCell", for: indexPath) as? CharacterCell
-        let character = filteredCharacters[indexPath.row]
-        setupCharacterCell(cell: cell, character: character)
+        if let character = viewModel.characters?[indexPath.row] {
+            setupCharacterCell(cell: cell, character: character)
+        }
         
         return cell ?? CharacterCell()
     }

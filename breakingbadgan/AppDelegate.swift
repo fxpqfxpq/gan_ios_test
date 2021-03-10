@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     static func openCharactersVC() {
-        let vc = UIViewController.classByIdentifier("Main", identifier: "CharactersTableViewController")
+        let vc = UIViewController.classByIdentifier("Main", identifier: "MainNavController")
         AppDelegate.sharedDelegate().window?.rootViewController = vc
     }
 
