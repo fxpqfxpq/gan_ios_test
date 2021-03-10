@@ -12,11 +12,19 @@ class CharactersTableViewController: UITableViewController {
 
     private let viewModel = CharactersViewModel()
     
+    let searchController = UISearchController(searchResultsController: nil)
+    var filteredCharacters: [Character] = []
+    var isSearchBarEmpty: Bool {
+        return searchController.searchBar.text?.isEmpty ?? true
+    }
+    
 
     // MARK: - Lifecycle methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupSearchController()
 
         let request = ServerRequest<CharactersRequest>.init(data: CharactersRequest.init())
         viewModel.getCharacters(charactersRequest: request).subscribe(onNext: { [weak self] (characters) in
@@ -41,12 +49,44 @@ class CharactersTableViewController: UITableViewController {
     // MARK: - Private methods
     
     private func onSuccess(_ characters: [Character]?) {
-        print("Characters: \(characters ?? [])")
-        tableView.reloadData()
+        if let characters = characters {
+            print("Characters: \(characters)")
+            filteredCharacters = characters
+            tableView.reloadData()
+        }
     }
     
     private func onError(_ error: Error) {
         print("Failed to get characters with error: \(error)")
+    }
+    
+    private func setupSearchController() {
+        searchController.searchResultsUpdater = self
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Breaking Bad Characters"
+        searchController.searchBar.searchBarStyle = .minimal
+        
+        tableView.tableHeaderView = searchController.searchBar
+        definesPresentationContext = true
+        navigationItem.hidesSearchBarWhenScrolling = true
+    }
+    
+    private func filterContentForSearchText(
+        _ searchText: String,
+        category: String? = nil
+    ) {
+        if let characters = viewModel.characters {
+            filteredCharacters = characters.filter { (character: Character) -> Bool in
+                return character.name.lowercased().contains(searchText.lowercased())
+            }
+            
+            if (searchText.isEmpty) {
+                filteredCharacters = characters
+            }
+            
+            tableView.reloadData()
+        }
     }
     
     private func setupCharacterCell(cell: CharacterCell?,  character: Character) {
@@ -67,17 +107,22 @@ class CharactersTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.characters?.count ?? 0
+        return filteredCharacters.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
             withIdentifier: "CharacterCell", for: indexPath) as? CharacterCell
-        print("DA IBA MUHATA")
-        if let character = viewModel.characters?[indexPath.row] {
-            setupCharacterCell(cell: cell, character: character)
-        }
+        let character = filteredCharacters[indexPath.row]
+        setupCharacterCell(cell: cell, character: character)
         
         return cell ?? CharacterCell()
+    }
+}
+
+extension CharactersTableViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        let searchBar = searchController.searchBar
+        filterContentForSearchText(searchBar.text!)
     }
 }
